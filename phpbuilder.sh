@@ -66,6 +66,7 @@ else
     exit 1
 fi
 
+# PHP version detection
 export PHPVER="$2"
 
 if [ -z "$PHPVER" ] && [ -n "$1" ]
@@ -74,10 +75,7 @@ then
   exit 1
 fi
 
-# Extract the major version
-PHPMAJVER=$(echo "$PHPVER" | awk -F. '{print $1 "." $2}')
-
-echo -e "${COL_GREEN}ℹ Setting PHP version: $PHPVER ($PHPMAJVER config) ${NC}"
+echo -e "${COL_GREEN}ℹ Setting PHP version: $PHPVER ${NC}"
 
 if [ "$1" == "init" ]
 then
@@ -150,8 +148,8 @@ then
     --enable-opcache \
     --enable-pcntl \
     --with-sodium \
-    --sysconfdir="$CONFDIR/$PHPMAJVER" \
-    --with-config-file-path="$CONFDIR/$PHPMAJVER"
+    --sysconfdir="$CONFDIR" \
+    --with-config-file-path="$CONFDIR"
 
   # Compile with 50% CPU usage so system keeps usable
   THREADS=$(($(nproc)/2))
@@ -175,18 +173,17 @@ then
 
   # Copy config files (if not existing yet)
   echo "Updating php + php-fpm config"
-  cp -n ./php.ini-development /etc/php/$PHPMAJVER/php.ini-development
-  cp -n ./php.ini-production /etc/php/$PHPMAJVER/php.ini-production
-  cp -n ./php.ini-production /etc/php/$PHPMAJVER/php.ini
-  cp -n ./sapi/fpm/php-fpm.conf /etc/php/$PHPMAJVER/php-fpm.conf
+  cp -n ./php.ini-development /etc/php/php.ini-development
+  cp -n ./php.ini-production /etc/php/php.ini-production
+  cp -n ./php.ini-production /etc/php/php.ini
+  cp -n ./sapi/fpm/php-fpm.conf /etc/php/php-fpm.conf
 
-  if [ ! -f "/etc/systemd/system/php${PHPMAJVER}-fpm.service" ]; then
-    cp -n "$SCRIPT_DIR/php-fpm.service" "/etc/systemd/system/php${PHPMAJVER}-fpm.service"
+  if [ ! -f "/etc/systemd/system/php-fpm.service" ]; then
+    cp -n "$SCRIPT_DIR/php-fpm.service" "/etc/systemd/system/php-fpm.service"
     # Update config values
-    sed -i "s/#MAJVER/$PHPMAJVER/g" "/etc/systemd/system/php${PHPMAJVER}-fpm.service"
-    sed -i "s/#CONFPATH/$CONFDIR\/$PHPMAJVER/g" "/etc/systemd/system/php${PHPMAJVER}-fpm.service"
+    sed -i "s/#CONFPATH/$CONFDIR/g" "/etc/systemd/system/php-fpm.service"
   fi
-  systemctl enable "php${PHPMAJVER}-fpm.service"
+  systemctl enable "php-fpm.service"
 
   echo -e ""
   echo -e "${COL_GREEN}✅ Installation completed!${NC}"
@@ -328,7 +325,7 @@ then
     fi
   }
 
-  restart_service "php${PHPMAJVER}-fpm.service"
+  restart_service php-fpm.service
   restart_service nginx.service
   restart_service apache2.service
   restart_service httpd.service
