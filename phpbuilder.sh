@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 #
-# PHP building on Debian 11/12 with nginx + php-fpm
+# PHP 8 building on Debian 11/12
+#
+# Provides a local PHP installation with useful PEAR + PECL extensions.
 #
 # Please adjust this to your environment before running!
 #
@@ -8,6 +10,7 @@
 #
 # Version 1.4 - January 2024
 #
+SCRIPT_VERSION="1.4"
 
 # Absolute path to the source directory. We'll build PHP in a sub-directory.
 SRCDIR="/usr/local/src"
@@ -43,26 +46,38 @@ echo -e "${COL_GREEN}  ___ _  _ ___   ___      _ _    _"
 echo -e " | _ \ || | _ \ | _ )_  _(_) |__| |___ _ _ "
 echo -e " |  _/ __ |  _/ | _ \ || | | / _\` / -_) '_|"
 echo -e " |_| |_||_|_|   |___/\_,_|_|_\__,_\___|_|  ${NC}"
-echo -e " ------------------------------------------"
-echo -e "${COL_LB} v1.4${NC}"
-echo -e " ------------------------------------------"
-echo -e " by Sven Reifschneider    ${COL_LB}::${NC} Neoground GmbH"
+echo -e " ------------------------------------- ${COL_LB}v${SCRIPT_VERSION}${NC}"
 echo -e ""
 
+# Get the OS information
+os_name=$(lsb_release -is)
+os_version=$(lsb_release -rs)
+
+# Check if OS is Debian 11 or Debian 12
+if [ "$os_name" = "Debian" ]; then
+    if [ "$os_version" = "11" ] || [ "$os_version" = "12" ]; then
+        echo "${COL_GREEN}ℹ Detected ${os_name} ${os_version}${NC}"
+    else
+        echo "❌ Error: OS not supported, aborting."
+        exit 1
+    fi
+else
+    echo "❌ Error: OS not supported, aborting."
+    exit 1
+fi
+
 export PHPVER="$2"
-echo -e "${COL_GREEN}:: Setting PHP version: $PHPVER ${NC}"
 
 if [ -z "$PHPVER" ] && [ -n "$1" ]
 then
-  echo -e "No PHP version detected. Please set it as the second parameter."
-
+  echo -e "❌ No PHP version detected. Please set it as the second parameter."
   exit 1
 fi
 
 # Extract the major version
 PHPMAJVER=$(echo "$PHPVER" | awk -F. '{print $1 "." $2}')
 
-echo -e "${COL_GREEN}:: Setting PHP version: $PHPVER ($PHPMAJVER config) ${NC}"
+echo -e "${COL_GREEN}ℹ Setting PHP version: $PHPVER ($PHPMAJVER config) ${NC}"
 
 if [ "$1" == "init" ]
 then
