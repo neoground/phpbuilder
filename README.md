@@ -19,7 +19,7 @@ up-to-date, and fully customizable PHP installation for their servers.
 - Fetch and build PHP8+ from source, including unit tests
 - Provide a modern environment with comprehensive PHP extension support 
 - Install built PHP, including PEAR and PECL 
-- Install custom PEAR and PECL extensions (e.g., `redis`, `imagick`)
+- Install custom PEAR and PECL extensions (currently `redis`, `imagick` and `mailparse`)
 - Make handy adjustments, like updating the imagick config for native PDF read/write support 
 - Organize config files under `/etc/php` in version-specific subdirectories (e.g., PHP 8.1: `/etc/php/8.1/php.ini`)
 - Enable PHP-FPM support via systemd
@@ -28,11 +28,13 @@ up-to-date, and fully customizable PHP installation for their servers.
 
 ## Usage
 
-Simply execute the main script and enter the desired PHP version. 
+Simply execute the main script in auto-mode and enter the desired PHP version. 
 The script will guide you through each step.
 
+You can also call the script without any parameters to display the help message.
+
 ```sh
-./phpbuilder.sh [PHP version]
+./phpbuilder.sh auto [PHP version]
 ```
 
 Alternatively, you can run the command without parameters to view 

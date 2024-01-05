@@ -1,0 +1,15 @@
+[Unit]
+Description=PHP#MAJVER FPM
+After=local-fs.target
+After=network.target
+After=nginx.service
+
+[Service]
+PIDFile=%t/php8/php#MAJVER-fpm.pid
+ExecStartPre=/bin/mkdir --parents %t/php8
+ExecStart=/usr/local/sbin/php-fpm --fpm-config #CONFPATH --nodaemonize
+ExecReload=/bin/kill -USR2 $MAINPID
+Type=simple
+
+[Install]
+WantedBy=multi-user.target
