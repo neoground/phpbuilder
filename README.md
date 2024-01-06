@@ -37,6 +37,85 @@ up-to-date, and fully customizable PHP installation for their servers.
 - Install the latest version of Composer 
 - Easily install all required dev dependencies
 
+## 🛠 Installation
+
+Experience the efficiency of PHPBuilder with our straightforward installation process.
+Whether you're looking to deploy the latest release or experiment with the most recent code, 
+our installation guide makes it easy for you to get started. 
+Follow these steps to install PHPBuilder on your system and elevate your PHP development environment.
+
+### Installing the Latest Release
+
+For those who prefer the stability and reliability of an official release, 
+installing the latest version of PHPBuilder is a simple process. Follow these 
+steps to get up and running with the most recent stable release:
+
+1. **Download the Latest Release**:  
+   Use `wget` to download the latest release package from our GitHub repository:
+
+   ```sh
+   wget https://github.com/neoground/phpbuilder/releases/download/v1.5/phpbuilder-v1.5.zip
+   ```
+
+2. **Unpack the Archive**:  
+   Once the download is complete, unzip the archive to extract the PHPBuilder script:
+
+   ```sh
+   unzip phpbuilder-v1.5.zip
+   ```
+
+3. **Set Execution Permissions**:  
+   Change the permission of the script to make it executable:
+
+   ```sh
+   chmod +x phpbuilder.sh
+   ```
+
+4. **Run the Installation**:  
+   Execute the PHPBuilder script in auto-mode with the desired PHP version (e.g., PHP 8.3.1):
+
+   ```sh
+   ./phpbuilder.sh auto 8.3.1
+   ```
+
+   The script will guide you through the installation process, ensuring a smooth and efficient setup.
+
+### Installing from the Latest Code
+
+For developers and sysadmins who like to stay on the cutting edge, installing PHPBuilder
+from the latest code offers access to the most recent features and updates. 
+Here’s how to install PHPBuilder using the latest code from our GitHub repository:
+
+1. **Clone the Repository**:  
+   Use `git` to clone the PHPBuilder repository to your local system:
+
+   ```sh
+   git clone https://github.com/neoground/phpbuilder.git
+   ```
+
+2. **Navigate to the Directory**:  
+   Change to the directory containing the cloned PHPBuilder script:
+
+   ```sh
+   cd phpbuilder
+   ```
+
+3. **Set Execution Permissions**:  
+   Update the script's permissions to make it executable:
+
+   ```sh
+   chmod +x phpbuilder.sh
+   ```
+
+4. **Run the Installation**:  
+   Start the PHPBuilder installation in auto-mode with your desired PHP version:
+
+   ```sh
+   ./phpbuilder.sh auto 8.3.1
+   ```
+
+   Follow the prompts provided by the script to complete the installation.
+
 ## 👩‍💻 Usage
 
 Simply execute the main script in auto-mode and enter the desired PHP version. 

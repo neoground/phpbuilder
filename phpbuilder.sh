@@ -8,9 +8,9 @@
 #
 # See usage instructions at the end of this file or simply run this file without parameters
 #
-# Version 1.4 - January 2024
+# Version 1.5 - January 2024
 #
-SCRIPT_VERSION="1.4"
+SCRIPT_VERSION="1.5"
 
 # Absolute path to the source directory. We'll build PHP in a sub-directory.
 SRCDIR="/usr/local/src"
@@ -21,7 +21,7 @@ PEARDIR="/usr/local/pear"
 # Absolute path to bin dir, where the executables will be installed to
 BINDIR="/usr/local/bin"
 
-# Absolute path to config main dir. The config will be in a sub-directory of the version (e.g. 8.3)
+# Absolute path to config main dir
 CONFDIR="/etc/php"
 
 # Get the directory of the current script
@@ -56,13 +56,13 @@ os_version=$(lsb_release -rs)
 # Check if OS is Debian 11 or Debian 12
 if [ "$os_name" = "Debian" ]; then
     if [ "$os_version" = "11" ] || [ "$os_version" = "12" ]; then
-        echo "${COL_GREEN}ℹ Detected ${os_name} ${os_version}${NC}"
+        echo -e "${COL_GREEN}ℹ Detected ${os_name} ${os_version}${NC}"
     else
-        echo "❌ Error: OS not supported, aborting."
+        echo -e "❌ Error: OS not supported, aborting."
         exit 1
     fi
 else
-    echo "❌ Error: OS not supported, aborting."
+    echo -e "❌ Error: OS not supported, aborting."
     exit 1
 fi
 
@@ -76,6 +76,7 @@ then
 fi
 
 echo -e "${COL_GREEN}ℹ Setting PHP version: $PHPVER ${NC}"
+echo -e ""
 
 if [ "$1" == "init" ]
 then
@@ -173,69 +174,67 @@ then
 
   # Copy config files (if not existing yet)
   echo "Updating php + php-fpm config"
-  cp -n ./php.ini-development /etc/php/php.ini-development
-  cp -n ./php.ini-production /etc/php/php.ini-production
-  cp -n ./php.ini-production /etc/php/php.ini
-  cp -n ./sapi/fpm/php-fpm.conf /etc/php/php-fpm.conf
-
-  if [ ! -f "/etc/systemd/system/php-fpm.service" ]; then
-    cp -n "$SCRIPT_DIR/php-fpm.service" "/etc/systemd/system/php-fpm.service"
-    # Update config values
-    sed -i "s/#CONFPATH/$CONFDIR/g" "/etc/systemd/system/php-fpm.service"
-  fi
-  systemctl enable "php-fpm.service"
+  cp -u ./php.ini-development $CONFDIR/php.ini-development
+  cp -u ./php.ini-production $CONFDIR/php.ini-production
 
   echo -e ""
   echo -e "${COL_GREEN}✅ Installation completed!${NC}"
 
   # Main config file (php.ini)
-  if [ ! -f /etc/php/php.ini ]; then
-    echo -e "${COL_GREEN}:: Missing config file: /etc/php/php.ini ${NC}"
+  if [ ! -f $CONFDIR/php.ini ]; then
+    echo -e ""
+    echo -e "${COL_GREEN}:: Missing config file: $CONFDIR/php.ini ${NC}"
 
     # In interactive mode ask the user for confirmation.
     if [ $INTERACTIVE = 1 ]; then
-      read -p "Do you want to create php.ini at /etc/php/php.ini? (Y/n): " USER_INPUT
+      read -p "Do you want to create php.ini at $CONFDIR/php.ini? (Y/n): " USER_INPUT
       if [ -z "$USER_INPUT" ]; then
         USER_INPUT="y"
       fi
       if [ "${USER_INPUT,,}" = "y" ]; then
-        cp "$SCRIPT_DIR/php.ini" /etc/php/php.ini
-        echo -e "php.ini created at /etc/php/php.ini"
+        cp ./php.ini-production $CONFDIR/php.ini
+        echo -e "php.ini created at $CONFDIR/php.ini"
       else
         echo -e "Skipping creating php.ini"
       fi
     else
         # In non-interactive mode copy file without asking for confirmation.
-        cp "$SCRIPT_DIR/php.ini" /etc/php/php.ini
-        echo -e "php.ini created at /etc/php/php.ini"
+        cp "$SCRIPT_DIR/php.ini" $CONFDIR/php.ini
+        echo -e "php.ini created at $CONFDIR/php.ini"
     fi
   fi
 
   # Config file for php-fpm
-  if [ ! -f /etc/php/php-fpm.conf ]; then
-    echo -e "${COL_GREEN}:: Missing config file: /etc/php/php-fpm.conf ${NC}"
+  if [ ! -f $CONFDIR/php-fpm.conf ]; then
+    echo -e ""
+    echo -e "${COL_GREEN}:: Missing config file: $CONFDIR/php-fpm.conf ${NC}"
 
     # In interactive mode ask the user for confirmation.
     if [ $INTERACTIVE = 1 ]; then
-      read -p "Do you want to create php-fpm.conf at /etc/php/php-fpm.conf? (Y/n): " USER_INPUT
+      read -p "Do you want to create php-fpm.conf at $CONFDIR/php-fpm.conf? (Y/n): " USER_INPUT
       if [ -z "$USER_INPUT" ]; then
         USER_INPUT="y"
       fi
       if [ "${USER_INPUT,,}" = "y" ]; then
-        cp "$SCRIPT_DIR/php-fpm.conf" /etc/php/php-fpm.conf
-        echo -e "php-fpm.conf created at /etc/php/php-fpm.conf"
+        cp "$SCRIPT_DIR/php-fpm.conf" $CONFDIR/php-fpm.conf
+        # Update config values
+        sed -i "s/#CONFPATH/$CONFDIR/g" "/etc/systemd/system/php-fpm.service"
+        echo -e "php-fpm.conf created at $CONFDIR/php-fpm.conf"
       else
         echo -e "Skipping creating php-fpm.conf"
       fi
     else
         # In non-interactive mode copy file without asking for confirmation.
-        cp "$SCRIPT_DIR/php-fpm.conf" /etc/php/php-fpm.conf
-        echo -e "php-fpm.conf created at /etc/php/php-fpm.conf"
+        cp "$SCRIPT_DIR/php-fpm.conf" $CONFDIR/php-fpm.conf
+        # Update config values
+        sed -i "s/#CONFPATH/$CONFDIR/g" "/etc/systemd/system/php-fpm.service"
+        echo -e "php-fpm.conf created at $CONFDIR/php-fpm.conf"
     fi
   fi
 
   # Systemd service + config for php-fpm
   if [ ! -f /etc/systemd/system/php-fpm.service ]; then
+    echo -e ""
     echo -e "${COL_GREEN}:: Missing php-fpm systemd service file: /etc/systemd/system/php-fpm.service ${NC}"
 
     # In interactive mode ask the user for confirmation.
@@ -282,7 +281,7 @@ then
   ln -s $PEARDIR/bin/pear $BINDIR/pear
   ln -s $PEARDIR/bin/peardev $BINDIR/peardev
   ln -s $PEARDIR/bin/pecl $BINDIR/pecl
-  $PEARDIR/bin/pecl config-set php_ini /etc/php/php.ini
+  $PEARDIR/bin/pecl config-set php_ini $CONFDIR/php.ini
 
   echo -e ""
   echo -e "${COL_GREEN}:: Installing PECL extensions${NC}"
@@ -379,23 +378,21 @@ fi
 # Default case: show help / info
 
 echo -e ""
-echo -e "This script helps you build and upgrade PHP versions"
-echo -e "for a Debian 11/12 environment."
+echo -e "This script helps you build and upgrade PHP versions for a Debian 11/12 environment."
 echo -e " "
-echo -e "Always provide the desired PHP version as the second"
-echo -e "parameter, as shown in the usage examples below."
+echo -e "Always provide the desired PHP version as the second parameter, as shown in the usage examples below."
 echo -e " "
-echo -e "Extensions and composer updates are optional for minor"
-echo -e "version updates. Usually, they can remain as is,"
-echo -e "so you may finish after the install step."
+echo -e "Extensions and composer updates are optional for minor version updates. Usually, they can remain as is, so you may finish after the install step."
 echo -e ""
-echo -e "You can also set '-y' as the last parameter"
-echo -e "for the non-interactive mode."
-echo -e "E.g. $0 auto 8.3.1 -y"
+echo -e "You can also set '-y' as the last parameter for the non-interactive mode (only works on manual usage commands)."
+echo -e "E.g. ${COL_GREEN}$0 auto 8.3.1 -y${NC}"
 echo -e ""
-echo -e "${COL_LB}Usage in order:${NC}"
+echo -e "${COL_LB}Automatic usage:${NC}"
 echo -e ""
 echo -e "$0 ${COL_GREEN}auto 8.3.1${NC}    -> Run all those commands in order for PHP 8.3.1"
+echo -e ""
+echo -e "${COL_LB}Manual usage in order:${NC}"
+echo -e ""
 echo -e "$0 ${COL_GREEN}init 8.3.1${NC}    -> Init system for PHP 8.3.1"
 echo -e "$0 ${COL_GREEN}compile 8.3.1${NC} -> Configure + make + test"
 echo -e "$0 ${COL_GREEN}install 8.3.1${NC} -> Make install + update config"
