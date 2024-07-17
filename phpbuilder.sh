@@ -136,8 +136,10 @@ then
     --with-openssl \
     --with-zlib \
     --with-curl \
+    --enable-bcmath \
     --enable-exif \
     --enable-gd \
+    --enable-gd-native-ttf \
     --with-freetype \
     --with-external-gd \
     --with-avif \
