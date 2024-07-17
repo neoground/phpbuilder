@@ -87,7 +87,7 @@ then
     apt install build-essential autoconf libtool bison re2c zlib1g-dev libgd-tools libssl-dev \
             libxml2-dev libssl-dev libsqlite3-dev libcurl4-openssl-dev libonig-dev \
             libxslt1-dev libzip-dev libsystemd-dev libc-client2007e-dev libbz2-dev libgd-dev \
-            libkrb5-dev libmagickwand-dev libsodium-dev libavif-dev
+            libkrb5-dev libmagickwand-dev libsodium-dev libavif-dev libargon2-1 wget
   else
     echo -e "${COL_GREEN}:: apt is not available on your system. Please make sure all required packages are installed! ${NC}"
   fi
@@ -140,8 +140,11 @@ then
     --enable-exif \
     --enable-gd \
     --with-freetype \
-    --with-external-gd \
+    --enable-gd \
     --with-avif \
+    --with-webp \
+    --with-jpeg \
+    --with-freetype \
     --enable-intl \
     --enable-mbstring \
     --with-mysqli \
@@ -151,6 +154,7 @@ then
     --with-xsl \
     --with-bz2 \
     --with-zip \
+    --with-zlib \
     --enable-calendar \
     --with-imap \
     --with-imap-ssl \
@@ -160,6 +164,8 @@ then
     --enable-opcache \
     --enable-pcntl \
     --with-sodium \
+    --with-password-argon2 \
+    --with-readline \
     --sysconfdir="$CONFDIR" \
     --with-config-file-path="$CONFDIR"
 
@@ -345,6 +351,18 @@ then
 
   echo -e ""
   echo -e "${COL_GREEN}✅ Services restarted!${NC}"
+
+  exit 0
+fi
+
+if [ "$1" == "clean" ]
+then
+  echo -e "${COL_GREEN}:: Clean up environment${NC}"
+
+  rm -Rf $SRCDIR/php-"$PHPVER" $SRCDIR/php-"$PHPVER".tar.gz
+
+  echo -e ""
+  echo -e "${COL_GREEN}✅ Cleaned up dev environment!${NC}"
 
   exit 0
 fi
