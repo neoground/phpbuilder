@@ -139,7 +139,6 @@ then
     --enable-bcmath \
     --enable-exif \
     --enable-gd \
-    --enable-gd-native-ttf \
     --with-freetype \
     --with-external-gd \
     --with-avif \
@@ -304,6 +303,7 @@ then
   $PEARDIR/bin/pecl install mailparse
   $PEARDIR/bin/pecl uninstall imagick
   $PEARDIR/bin/pecl install imagick
+  $PEARDIR/bin/pear install pear/PHP_Archive
 
   echo -e ""
   echo -e "${COL_GREEN}✅ Installation completed!${NC}"
