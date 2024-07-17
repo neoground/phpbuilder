@@ -8,9 +8,9 @@
 #
 # See usage instructions at the end of this file or simply run this file without parameters
 #
-# Version 1.5 - January 2024
+# Version 1.6 - July 2024
 #
-SCRIPT_VERSION="1.5"
+SCRIPT_VERSION="1.6"
 
 # Absolute path to the source directory. We'll build PHP in a sub-directory.
 SRCDIR="/usr/local/src"
@@ -94,9 +94,19 @@ then
   echo -e ""
 
   if [[ -f /etc/ImageMagick-6/policy.xml ]]; then
-    sed -i 's+rights="none" pattern="PDF"+rights="read|write" pattern="PDF"+g' /etc/ImageMagick-6/policy.xml
-    sed -i 's+name="disk" value="1GiB"+name="disk" value="2GiB"+g' /etc/ImageMagick-6/policy.xml
-    echo -e "Updated ImageMagick configuration to allow PDF files handling."
+    if [ $INTERACTIVE = 1 ]; then
+      read -p "Do you want to update imagemagick policy.xml to allow PDF file handling? (Y/n): " USER_INPUT
+      if [ -z "$USER_INPUT" ]; then
+        sed -i 's+rights="none" pattern="PDF"+rights="read|write" pattern="PDF"+g' /etc/ImageMagick-6/policy.xml
+        sed -i 's+name="disk" value="1GiB"+name="disk" value="2GiB"+g' /etc/ImageMagick-6/policy.xml
+        echo -e "Updated ImageMagick configuration to allow PDF files handling."
+      fi
+    else
+      # In non-interactive mode just do it
+      sed -i 's+rights="none" pattern="PDF"+rights="read|write" pattern="PDF"+g' /etc/ImageMagick-6/policy.xml
+      sed -i 's+name="disk" value="1GiB"+name="disk" value="2GiB"+g' /etc/ImageMagick-6/policy.xml
+      echo -e "Updated ImageMagick configuration to allow PDF files handling."
+    fi
   else
     echo -e "The file /etc/ImageMagick-6/policy.xml does not exist. Skipping config updates."
   fi
@@ -385,17 +395,17 @@ echo -e " "
 echo -e "Extensions and composer updates are optional for minor version updates. Usually, they can remain as is, so you may finish after the install step."
 echo -e ""
 echo -e "You can also set '-y' as the last parameter for the non-interactive mode (only works on manual usage commands)."
-echo -e "E.g. ${COL_GREEN}$0 auto 8.3.1 -y${NC}"
+echo -e "E.g. ${COL_GREEN}$0 auto 8.3.9 -y${NC}"
 echo -e ""
 echo -e "${COL_LB}Automatic usage:${NC}"
 echo -e ""
-echo -e "$0 ${COL_GREEN}auto 8.3.1${NC}    -> Run all those commands in order for PHP 8.3.1"
+echo -e "$0 ${COL_GREEN}auto 8.3.9${NC}    -> Run all those commands in order for PHP 8.3.9"
 echo -e ""
 echo -e "${COL_LB}Manual usage in order:${NC}"
 echo -e ""
-echo -e "$0 ${COL_GREEN}init 8.3.1${NC}    -> Init system for PHP 8.3.1"
-echo -e "$0 ${COL_GREEN}compile 8.3.1${NC} -> Configure + make + test"
-echo -e "$0 ${COL_GREEN}install 8.3.1${NC} -> Make install + update config"
+echo -e "$0 ${COL_GREEN}init 8.3.9${NC}    -> Init system for PHP 8.3.9"
+echo -e "$0 ${COL_GREEN}compile 8.3.9${NC} -> Configure + make + test"
+echo -e "$0 ${COL_GREEN}install 8.3.9${NC} -> Make install + update config"
 echo -e "$0 ${COL_GREEN}ext${NC}           -> Install PEAR + PECL extensions (redis, mailparse, imagick)"
 echo -e "$0 ${COL_GREEN}composer${NC}      -> Install latest composer"
 echo -e "$0 ${COL_GREEN}finish${NC}        -> Restart services"
