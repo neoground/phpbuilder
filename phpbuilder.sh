@@ -180,7 +180,7 @@ fi
 if [ "$1" == "install" ]
 then
   echo -e "${COL_GREEN}:: Installing PHP v$PHPVER ${NC}"
-  cd $SRCDIR/src/php-"$PHPVER" || exit 1
+  cd $SRCDIR/php-"$PHPVER" || exit 1
   make install
 
   # Copy config files (if not existing yet)
@@ -279,8 +279,8 @@ then
   # Installing PEAR + PECL extensions
   echo -e ""
   echo -e "${COL_GREEN}:: Installing PEAR${NC}"
-  cd $SRCDIR/src || exit 1
-  rm -Rf $SRCDIR/src/go-pear.phar
+  cd $SRCDIR || exit 1
+  rm -Rf $SRCDIR/go-pear.phar
   wget https://pear.php.net/go-pear.phar
 
   echo -e ""
