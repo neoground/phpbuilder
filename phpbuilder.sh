@@ -8,9 +8,9 @@
 #
 # See usage instructions at the end of this file or simply run this file without parameters
 #
-# Version 1.6 - July 2024
+# Version 1.7 - July 2024
 #
-SCRIPT_VERSION="1.6"
+SCRIPT_VERSION="1.7"
 
 # Absolute path to the source directory. We'll build PHP in a sub-directory.
 SRCDIR="/usr/local/src"
@@ -35,18 +35,55 @@ if [ "$3" = "-y" ]; then
   INTERACTIVE=0
 fi
 
+# Define colors and formatting
+BLUE='\033[1;34m'
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+BOLD='\033[1m'
+RESET='\033[0m'
+
+# Function to display a header
+display_header() {
+  local title="$1"
+  echo -e "\n${BLUE}::${RESET} ${BOLD}${title}${RESET}\n"
+}
+
+# Function to display a subheader
+display_subheader() {
+  local subheader="$1"
+  echo -e "\n${GREEN}::${RESET} ${BOLD}${subheader}${RESET}\n"
+}
+
+# Function to display an error message
+display_error() {
+  local message="$1"
+  echo -e "\n❌ Error: ${RED}${message}${RESET}\n"
+}
+
+# Function to display a success message
+display_success() {
+  local message="$1"
+  echo -e "\n✅ ${GREEN}${message}${RESET}\n"
+}
+
+# Function to display an info message
+display_info() {
+  local message="$1"
+  echo -e "\nℹ  ${BLUE}${message}${RESET}\n"
+}
+
 # Color output
-COL_GREEN='\e[0;32m'
-COL_LB='\e[1;34m'
+GREEN='\e[0;32m'
+
 NC='\e[0m' # No Color
 
 # Header
 echo -e ""
-echo -e "${COL_GREEN}  ___ _  _ ___   ___      _ _    _"
+echo -e "${GREEN}  ___ _  _ ___   ___      _ _    _"
 echo -e " | _ \ || | _ \ | _ )_  _(_) |__| |___ _ _ "
 echo -e " |  _/ __ |  _/ | _ \ || | | / _\` / -_) '_|"
 echo -e " |_| |_||_|_|   |___/\_,_|_|_\__,_\___|_|  ${NC}"
-echo -e " ------------------------------------- ${COL_LB}v${SCRIPT_VERSION}${NC}"
+echo -e " ------------------------------------- ${BLUE}v${SCRIPT_VERSION}${NC}"
 echo -e ""
 
 # Get the OS information
@@ -56,13 +93,13 @@ os_version=$(lsb_release -rs)
 # Check if OS is Debian 11 or Debian 12
 if [ "$os_name" = "Debian" ]; then
     if [ "$os_version" = "11" ] || [ "$os_version" = "12" ]; then
-        echo -e "${COL_GREEN}ℹ Detected ${os_name} ${os_version}${NC}"
+        display_info "Detected ${os_name} ${os_version}"
     else
-        echo -e "❌ Error: OS not supported, aborting."
+        display_error "OS not supported, aborting."
         exit 1
     fi
 else
-    echo -e "❌ Error: OS not supported, aborting."
+    display_error "OS not supported, aborting."
     exit 1
 fi
 
@@ -71,25 +108,28 @@ export PHPVER="$2"
 
 if [ -z "$PHPVER" ] && [ -n "$1" ]
 then
-  echo -e "❌ No PHP version detected. Please set it as the second parameter."
+  display_error "No PHP version detected. Please set it as the second parameter."
   exit 1
 fi
 
-echo -e "${COL_GREEN}ℹ Setting PHP version: $PHPVER ${NC}"
+if [[ ! -z "$PHPVER" ]]
+then
+display_info "Setting PHP version: $PHPVER"
+fi
 echo -e ""
 
 if [ "$1" == "init" ]
 then
-  echo -e "${COL_GREEN}:: Creating environment for PHP v$PHPVER ${NC}"
+  display_header "Creating environment for PHP v$PHPVER"
   # Install dependencies only if they're missing and apt is available
   if command -v apt > /dev/null; then
-    echo -e "${COL_GREEN}:: apt is available: checking dependencies and installing missing packages ${NC}"
+    display_subheader "Checking dependencies and installing missing packages"
     apt install build-essential autoconf libtool bison re2c zlib1g-dev libgd-tools libssl-dev \
             libxml2-dev libssl-dev libsqlite3-dev libcurl4-openssl-dev libonig-dev \
             libxslt1-dev libzip-dev libsystemd-dev libc-client2007e-dev libbz2-dev libgd-dev \
             libkrb5-dev libmagickwand-dev libsodium-dev libavif-dev libargon2-1 wget
   else
-    echo -e "${COL_GREEN}:: apt is not available on your system. Please make sure all required packages are installed! ${NC}"
+    display_info "apt is not available on your system. Please make sure all required packages are installed!"
   fi
   echo -e ""
 
@@ -120,14 +160,13 @@ then
   cd php-"$PHPVER" || exit 1
   ./buildconf
 
-  echo -e ""
-  echo -e "${COL_GREEN}✅ Init completed, you can now compile!${NC}"
+  display_success "Init completed, you can now compile!"
   exit 0
 fi
 
 if [ "$1" == "compile" ]
 then
-  echo -e "${COL_GREEN}:: Compiling for PHP v$PHPVER ${NC}"
+  display_header "Compiling for PHP v$PHPVER"
   cd $SRCDIR/php-"$PHPVER" || exit 1
   # Config, Compile, Test
   ./configure \
@@ -171,21 +210,18 @@ then
 
   # Compile with 50% CPU usage so system keeps usable
   THREADS=$(($(nproc)/2))
-  echo -e ""
-  echo -e "${COL_GREEN}:: Starting compiler with $THREADS threads...${NC}"
+  display_header "Starting compiler with $THREADS threads..."
   make -j $THREADS
-  echo -e ""
-  echo -e "${COL_GREEN}:: Compilation completed, running tests${NC}"
+  display_header "Compilation completed, running tests"
   make test
-  echo -e ""
-  echo -e "${COL_GREEN}✅ Compilation and tests completed!${NC}"
+  display_success "Compilation and tests completed!"
 
   exit 0
 fi
 
 if [ "$1" == "install" ]
 then
-  echo -e "${COL_GREEN}:: Installing PHP v$PHPVER ${NC}"
+  display_header "Installing PHP v$PHPVER"
   cd $SRCDIR/php-"$PHPVER" || exit 1
   make install
 
@@ -194,13 +230,11 @@ then
   cp -u ./php.ini-development $CONFDIR/php.ini-development
   cp -u ./php.ini-production $CONFDIR/php.ini-production
 
-  echo -e ""
-  echo -e "${COL_GREEN}✅ Installation completed!${NC}"
+  display_success "Installation completed!"
 
   # Main config file (php.ini)
   if [ ! -f $CONFDIR/php.ini ]; then
-    echo -e ""
-    echo -e "${COL_GREEN}:: Missing config file: $CONFDIR/php.ini ${NC}"
+    display_header "Missing config file: $CONFDIR/php.ini"
 
     # In interactive mode ask the user for confirmation.
     if [ $INTERACTIVE = 1 ]; then
@@ -223,8 +257,7 @@ then
 
   # Config file for php-fpm
   if [ ! -f $CONFDIR/php-fpm.conf ]; then
-    echo -e ""
-    echo -e "${COL_GREEN}:: Missing config file: $CONFDIR/php-fpm.conf ${NC}"
+    display_header "Missing config file: $CONFDIR/php-fpm.conf"
 
     # In interactive mode ask the user for confirmation.
     if [ $INTERACTIVE = 1 ]; then
@@ -251,8 +284,7 @@ then
 
   # Systemd service + config for php-fpm
   if [ ! -f /etc/systemd/system/php-fpm.service ]; then
-    echo -e ""
-    echo -e "${COL_GREEN}:: Missing php-fpm systemd service file: /etc/systemd/system/php-fpm.service ${NC}"
+    display_header "Missing php-fpm systemd service file: /etc/systemd/system/php-fpm.service"
 
     # In interactive mode ask the user for confirmation.
     if [ $INTERACTIVE = 1 ]; then
@@ -280,17 +312,15 @@ fi
 
 if [ "$1" == "ext" ]
 then
-  echo -e "${COL_GREEN}:: Installing PEAR + PECL extensions${NC}"
+  display_header "Installing PEAR + PECL extensions"
 
   # Installing PEAR + PECL extensions
-  echo -e ""
-  echo -e "${COL_GREEN}:: Installing PEAR${NC}"
+  display_subheader "Installing PEAR"
   cd $SRCDIR || exit 1
   rm -Rf $SRCDIR/go-pear.phar
   wget https://pear.php.net/go-pear.phar
 
-  echo -e ""
-  echo -e "${COL_LB}Please set the following values:${NC}"
+  display_info "Please set the following values:"
   echo -e "1: $PEARDIR"
   echo -e ""
 
@@ -300,8 +330,7 @@ then
   ln -s $PEARDIR/bin/pecl $BINDIR/pecl
   $PEARDIR/bin/pecl config-set php_ini $CONFDIR/php.ini
 
-  echo -e ""
-  echo -e "${COL_GREEN}:: Installing PECL extensions${NC}"
+  display_subheader "Installing PECL extensions"
 
   $PEARDIR/bin/pecl uninstall redis
   $PEARDIR/bin/pecl install redis
@@ -311,8 +340,7 @@ then
   $PEARDIR/bin/pecl install imagick
   $PEARDIR/bin/pear install pear/PHP_Archive
 
-  echo -e ""
-  echo -e "${COL_GREEN}✅ Installation completed!${NC}"
+  display_success "Installation completed!"
 
   exit 0
 fi
@@ -320,19 +348,18 @@ fi
 if [ "$1" == "composer" ]
 then
   # Install composer
-  echo -e "${COL_GREEN}:: Installing composer${NC}"
+  display_header "Installing composer"
   wget -O $BINDIR/composer https://getcomposer.org/composer-stable.phar
   chmod +x $BINDIR/composer
 
-  echo -e ""
-  echo -e "${COL_GREEN}✅ Installation completed!${NC}"
+  display_success "Installation completed!"
 
   exit 0
 fi
 
 if [ "$1" == "finish" ]
 then
-  echo -e "${COL_GREEN}:: Restarting services${NC}"
+  display_header "Restarting services"
 
   restart_service() {
     local service="$1"
@@ -349,27 +376,28 @@ then
   restart_service lsws.service
   restart_service zoneminder.service
 
-  echo -e ""
-  echo -e "${COL_GREEN}✅ Services restarted!${NC}"
+  display_success "Services restarted!"
+
+  display_header "PHP Version"
+  $BINDIR/php -v
 
   exit 0
 fi
 
 if [ "$1" == "clean" ]
 then
-  echo -e "${COL_GREEN}:: Clean up environment${NC}"
+  display_header "Clean up environment"
 
   rm -Rf $SRCDIR/php-"$PHPVER" $SRCDIR/php-"$PHPVER".tar.gz
 
-  echo -e ""
-  echo -e "${COL_GREEN}✅ Cleaned up dev environment!${NC}"
+  display_success "Cleaned up dev environment!"
 
   exit 0
 fi
 
 if [ "$1" == "auto" ]
 then
-  echo -e "${COL_GREEN}:: Auto builder for PHP v$PHPVER ${NC}"
+  display_header "Auto builder for PHP v$PHPVER"
 
   function ask_execute() {
     local command=$1
@@ -397,11 +425,6 @@ then
   ask_execute composer "(5/6) Do you want to install the latest composer?"
   ask_execute finish "(6/6) Do you want to finish the installation and restart services?"
 
-  echo -e ""
-  echo -e "${COL_GREEN}✅ PHP v${PHPVER} installed successfully!${NC}"
-  echo -e ""
-  $BINDIR/php -v
-
   exit 0
 fi
 
@@ -415,20 +438,21 @@ echo -e " "
 echo -e "Extensions and composer updates are optional for minor version updates. Usually, they can remain as is, so you may finish after the install step."
 echo -e ""
 echo -e "You can also set '-y' as the last parameter for the non-interactive mode (only works on manual usage commands)."
-echo -e "E.g. ${COL_GREEN}$0 auto 8.3.9 -y${NC}"
+echo -e "E.g. ${GREEN}$0 auto 8.3.9 -y${NC}"
 echo -e ""
-echo -e "${COL_LB}Automatic usage:${NC}"
+echo -e "${BLUE}Automatic usage:${NC}"
 echo -e ""
-echo -e "$0 ${COL_GREEN}auto 8.3.9${NC}    -> Run all those commands in order for PHP 8.3.9"
+echo -e "$0 ${GREEN}auto 8.3.9${NC}    -> Run all those commands in order for PHP 8.3.9"
 echo -e ""
-echo -e "${COL_LB}Manual usage in order:${NC}"
+echo -e "${BLUE}Manual usage in order:${NC}"
 echo -e ""
-echo -e "$0 ${COL_GREEN}init 8.3.9${NC}    -> Init system for PHP 8.3.9"
-echo -e "$0 ${COL_GREEN}compile 8.3.9${NC} -> Configure + make + test"
-echo -e "$0 ${COL_GREEN}install 8.3.9${NC} -> Make install + update config"
-echo -e "$0 ${COL_GREEN}ext${NC}           -> Install PEAR + PECL extensions (redis, mailparse, imagick)"
-echo -e "$0 ${COL_GREEN}composer${NC}      -> Install latest composer"
-echo -e "$0 ${COL_GREEN}finish${NC}        -> Restart services"
+echo -e "$0 ${GREEN}init 8.3.9${NC}    -> Init system for PHP 8.3.9"
+echo -e "$0 ${GREEN}compile 8.3.9${NC} -> Configure + make + test"
+echo -e "$0 ${GREEN}install 8.3.9${NC} -> Make install + update config"
+echo -e "$0 ${GREEN}ext${NC}           -> Install PEAR + PECL extensions (redis, mailparse, imagick)"
+echo -e "$0 ${GREEN}composer${NC}      -> Install latest composer"
+echo -e "$0 ${GREEN}finish${NC}        -> Restart services"
+echo -e "$0 ${GREEN}clean${NC}         -> Clean up environment (remove source)"
 echo -e ""
 
 exit 0

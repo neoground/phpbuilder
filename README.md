@@ -54,14 +54,14 @@ steps to get up and running with the most recent stable release:
    Use `wget` to download the latest release package from our GitHub repository:
 
    ```sh
-   wget https://github.com/neoground/phpbuilder/releases/download/v1.5/phpbuilder-v1.6.zip
+   wget https://github.com/neoground/phpbuilder/releases/download/v1.7/phpbuilder-v1.7.zip
    ```
 
 2. **Unpack the Archive**:  
    Once the download is complete, unzip the archive to extract the PHPBuilder script:
 
    ```sh
-   unzip phpbuilder-v1.6.zip
+   unzip phpbuilder-v1.7.zip
    ```
 
 3. **Set Execution Permissions**:  
