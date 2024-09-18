@@ -72,10 +72,10 @@ steps to get up and running with the most recent stable release:
    ```
 
 4. **Run the Installation**:  
-   Execute the PHPBuilder script in auto-mode with the desired PHP version (e.g., PHP 8.3.9):
+   Execute the PHPBuilder script in auto-mode with the desired PHP version (e.g., PHP 8.3.11):
 
    ```sh
-   ./phpbuilder.sh auto 8.3.9
+   ./phpbuilder.sh auto 8.3.11
    ```
 
    The script will guide you through the installation process, ensuring a smooth and efficient setup.
@@ -112,7 +112,7 @@ Here’s how to install PHPBuilder using the latest code from our GitHub reposit
    Start the PHPBuilder installation in auto-mode with your desired PHP version:
 
    ```sh
-   ./phpbuilder.sh auto 8.3.9
+   ./phpbuilder.sh auto 8.3.11
    ```
 
    Follow the prompts provided by the script to complete the installation.
